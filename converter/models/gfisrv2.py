@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 gfisrv2.py - Standalone GFISRV2 model architecture for PyTorch & TensorRT export.
+Architecture designed by umzi2 (https://github.com/umzi2) in resselt (https://github.com/rewaifu/resselt).
 Zero external Spandrel dependencies; exports clean ai.onnx.contrib::Rfft / Irfft nodes.
 """
 

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 lawfft.py - Standalone LAWFFT model architecture for PyTorch & TensorRT export.
+Architecture designed by umzi2 (https://github.com/umzi2) in resselt (https://github.com/rewaifu/resselt).
 Local Adaptive Weighted Fourier Feature Transformer.
 """
 

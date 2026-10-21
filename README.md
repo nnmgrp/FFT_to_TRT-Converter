@@ -1,8 +1,24 @@
 # FFT_to_TRT-Converter
 
+<p align="center">
+  <b><a href="README.md">English</a></b> |
+  <b><a href="README_RU.md">Русский</a></b> |
+  <b><a href="README_JA.md">日本語</a></b>
+</p>
+
+---
+
 **High-Performance TensorRT FFT Plugin & Universal Model Converter for Windows**
 
 Convert frequency-domain super-resolution and image restoration architectures (such as **GFISRV2**, **LAWFFT**, and custom neural FFT networks) from PyTorch checkpoints into ultra-fast NVIDIA TensorRT engines.
+
+---
+
+## Acknowledgements & Credits
+
+- **[umzi2](https://github.com/umzi2)**: Creator and author of the **GFISRV2** (Gated Fourier Inception Super-Resolution v2) and **LAWFFT** (Local Adaptive Weighted Fourier Feature Transformer) neural architectures in the **[resselt](https://github.com/rewaifu/resselt)** repository.
+- **[Alexey-Kamenev](https://github.com/Alexey-Kamenev/tensorrt-dft-plugins)**: Original Linux implementation of the TensorRT DFT plugin.
+- **[chaiNNer](https://github.com/chaiNNer-org/chaiNNer)**: The visual node-based image processing GUI where these models are deployed.
 
 ---
 
@@ -31,8 +47,8 @@ Convert frequency-domain super-resolution and image restoration architectures (s
 FFT_to_TRT-Converter/
 ├── converter/
 │   ├── models/
-│   │   ├── gfisrv2.py        # Standalone GFISRV2 implementation
-│   │   └── lawfft.py         # Standalone LAWFFT implementation
+│   │   ├── gfisrv2.py        # Standalone GFISRV2 implementation (by umzi2)
+│   │   └── lawfft.py         # Standalone LAWFFT implementation (by umzi2)
 │   ├── torch2onnx.py         # Universal PyTorch (.pth / .safetensors) -> ONNX exporter
 │   ├── build_engine.py       # Robust TensorRT builder with dynamic profiles & memory safety
 │   ├── benchmark.py          # Parity validation (PSNR/MAE) & latency benchmark
