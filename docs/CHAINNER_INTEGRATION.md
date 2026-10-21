@@ -1,5 +1,13 @@
 # chaiNNer Integration & Tiling Guide
 
+<p align="center">
+  <b><a href="CHAINNER_INTEGRATION.md">English</a></b> |
+  <b><a href="CHAINNER_INTEGRATION_RU.md">Русский</a></b> |
+  <b><a href="CHAINNER_INTEGRATION_JA.md">日本語</a></b>
+</p>
+
+---
+
 This guide explains how to integrate converted TensorRT FFT engines into **chaiNNer**, optimize performance, and avoid common throughput bottlenecks.
 
 ---

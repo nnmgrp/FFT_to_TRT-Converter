@@ -1,5 +1,13 @@
 # Architecture & Technical Deep-Dive
 
+<p align="center">
+  <b><a href="ARCHITECTURE.md">English</a></b> |
+  <b><a href="ARCHITECTURE_RU.md">Русский</a></b> |
+  <b><a href="ARCHITECTURE_JA.md">日本語</a></b>
+</p>
+
+---
+
 This document details the internal mathematical foundations, CUDA/cuFFT execution pipeline, and TensorRT plugin design of the **FFT_to_TRT-Converter**.
 
 ---

@@ -65,9 +65,9 @@ FFT_to_TRT-Converter/
 │       ├── trt_dft_plugins.dll # コンパイル済み DLL
 │       └── trt_dft_plugins.lib # インポートライブラリ (.lib)
 ├── docs/
-│   ├── ARCHITECTURE.md       # 数学的背景: Ortho スケーリング、cuBLAS、TRT プラグイン設計
-│   ├── CHAINNER_INTEGRATION.md # chaiNNer 連携ガイド、タイリング最適化、自動読み込み
-│   └── TROUBLESHOOTING.md    # トラブルシューティング: CUDA 13 cuFFT 名、OOM、Compute Tier
+│   ├── ARCHITECTURE_JA.md    # 数学的背景: Ortho スケーリング、cuBLAS、TRT プラグイン設計
+│   ├── CHAINNER_INTEGRATION_JA.md # chaiNNer 連携ガイド、タイリング最適化、自動読み込み
+│   └── TROUBLESHOOTING_JA.md # トラブルシューティング: CUDA 13 cuFFT 名、OOM、Compute Tier
 ├── requirements.txt
 └── README_JA.md
 ```
@@ -150,9 +150,9 @@ python converter\benchmark.py --model path\to\model.safetensors --engine path\to
 
 ## ドキュメント
 
-- [アーキテクチャと数学的基礎 (英語)](docs/ARCHITECTURE.md)
-- [chaiNNer 連携とタイリング最適化ガイド (英語)](docs/CHAINNER_INTEGRATION.md)
-- [トラブルシューティングと既知の問題 (英語)](docs/TROUBLESHOOTING.md)
+- [アーキテクチャと数学的基礎](docs/ARCHITECTURE_JA.md)
+- [chaiNNer 連携とタイリング最適化ガイド](docs/CHAINNER_INTEGRATION_JA.md)
+- [トラブルシューティングと既知の問題](docs/TROUBLESHOOTING_JA.md)
 
 ---
 

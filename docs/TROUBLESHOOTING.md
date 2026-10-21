@@ -1,5 +1,13 @@
 # Troubleshooting & Common Issues
 
+<p align="center">
+  <b><a href="TROUBLESHOOTING.md">English</a></b> |
+  <b><a href="TROUBLESHOOTING_RU.md">Русский</a></b> |
+  <b><a href="TROUBLESHOOTING_JA.md">日本語</a></b>
+</p>
+
+---
+
 This guide addresses known edge cases, environment idiosyncrasies, and troubleshooting steps.
 
 ---

@@ -65,9 +65,9 @@ FFT_to_TRT-Converter/
 │       ├── trt_dft_plugins.dll # Скомпилированная DLL плагина
 │       └── trt_dft_plugins.lib # Файл импорта .lib
 ├── docs/
-│   ├── ARCHITECTURE.md       # Математика: Ortho-масштабирование, cuBLAS и API плагинов TRT
-│   ├── CHAINNER_INTEGRATION.md # Инструкция по интеграции в chaiNNer, тайлинг и автозагрузка
-│   └── TROUBLESHOOTING.md    # Решение проблем: имена cuFFT в CUDA 13, OOM и архитектуры GPU
+│   ├── ARCHITECTURE_RU.md    # Математика: Ortho-масштабирование, cuBLAS и API плагинов TRT
+│   ├── CHAINNER_INTEGRATION_RU.md # Инструкция по интеграции в chaiNNer, тайлинг и автозагрузка
+│   └── TROUBLESHOOTING_RU.md # Решение проблем: имена cuFFT в CUDA 13, OOM и архитектуры GPU
 ├── requirements.txt
 └── README_RU.md
 ```
@@ -150,9 +150,9 @@ python converter\benchmark.py --model путь\к\модели.safetensors --eng
 
 ## Документация
 
-- [Архитектура и математические основы](docs/ARCHITECTURE.md)
-- [Интеграция в chaiNNer и оптимизация тайлинга](docs/CHAINNER_INTEGRATION.md)
-- [Устранение неполадок и частые ошибки](docs/TROUBLESHOOTING.md)
+- [Архитектура и математические основы](docs/ARCHITECTURE_RU.md)
+- [Интеграция в chaiNNer и оптимизация тайлинга](docs/CHAINNER_INTEGRATION_RU.md)
+- [Устранение неполадок и частые ошибки](docs/TROUBLESHOOTING_RU.md)
 
 ---
 
