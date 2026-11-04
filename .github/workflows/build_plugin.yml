@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - chaiNNer-C
     paths:
       - 'plugin/**'
       - '.github/workflows/build_plugin.yml'
@@ -13,6 +14,7 @@ on:
   pull_request:
     branches:
       - main
+      - chaiNNer-C
     paths:
       - 'plugin/**'
       - '.github/workflows/build_plugin.yml'
@@ -25,7 +27,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        cuda: ['12.8', '13.1']
+        cuda: ['12.8.0', '13.1.0']
 
     steps:
       - name: Checkout repository
@@ -46,7 +48,7 @@ jobs:
         shell: pwsh
         run: |
           cmake -B build -S plugin `
-            -G "Visual Studio 17 2022" -A x64 `
+            -A x64 `
             -DCMAKE_BUILD_TYPE=Release `
             -DCMAKE_CUDA_ARCHITECTURES="75;80;86;89;90;120"
 
@@ -55,7 +57,7 @@ jobs:
         run: |
           cmake --build build --config Release --parallel
 
-      - name: Verify Exported getCreators Symbol
+      - name: Verify Exported Symbols
         shell: pwsh
         run: |
           $dll = "build/src/dft_plugins/Release/trt_dft_plugins.dll"
@@ -71,6 +73,12 @@ jobs:
             exit 1
           }
           Write-Host "[OK] Confirmed exported symbol: $($match.Line)"
+          $matchLogger = $exports | Select-String "setLoggerFinder"
+          if (!$matchLogger) {
+            Write-Error "Exported symbol 'setLoggerFinder' was NOT found in the DLL!"
+            exit 1
+          }
+          Write-Host "[OK] Confirmed exported symbol: $($matchLogger.Line)"
 
       - name: Package Binaries
         shell: pwsh
@@ -87,10 +95,31 @@ jobs:
           name: trt_dft_plugins_cuda${{ matrix.cuda }}_win64
           path: trt_dft_plugins_cuda${{ matrix.cuda }}_win64.zip
 
-      - name: Release Asset (On Tagged Release)
-        if: startsWith(github.ref, 'refs/tags/')
+  publish-prerelease:
+    name: Publish prerelease
+    if: github.event_name != 'pull_request'
+    needs: build-windows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: trt_dft_plugins_cuda*_win64
+          path: artifacts
+
+      - name: Publish GitHub prerelease
         uses: softprops/action-gh-release@v2
         with:
-          files: trt_dft_plugins_cuda${{ matrix.cuda }}_win64.zip
+          tag_name: build-${{ github.run_number }}-${{ github.run_attempt }}
+          target_commitish: ${{ github.sha }}
+          name: TensorRT DFT Plugin build ${{ github.run_number }} (${{ github.ref_name }})
+          body: Automated prerelease from commit ${{ github.sha }}.
+          prerelease: true
+          make_latest: false
+          files: artifacts/**/*.zip
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

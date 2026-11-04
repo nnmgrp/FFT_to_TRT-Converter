@@ -150,7 +150,7 @@ python converter\benchmark.py --model path\to\model.safetensors --engine path\to
 This repository includes a GitHub Actions CI workflow (`.github/workflows/build_plugin.yml`):
 - Compiles DLL targeting all GPU architectures simultaneously (`75;80;86;89;90;120`: Turing, Ampere, Ada, Blackwell).
 - Builds release packages for both **CUDA 12.8** (for chaiNNer) and **CUDA 13.1**.
-- 1-Click execution: On the GitHub repo, go to **Actions** $\to$ **Build TensorRT DFT Plugin** $\to$ **Run workflow**, and download the precompiled zip from build artifacts.
+- Every successful non-PR run publishes both ZIPs as a GitHub prerelease. Find them under **Releases**; pull-request builds remain available as Actions artifacts.
 
 ### Option 2: Local Compilation from Source
 Headers and import library are bundled in `plugin/include` and `plugin/lib`:

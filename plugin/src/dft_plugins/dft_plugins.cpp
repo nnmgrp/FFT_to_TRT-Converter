@@ -613,13 +613,8 @@ class RfftPluginCreator: public IPluginCreator {
 static RfftPluginCreator<RfftPlugin> gRfftCreator{};
 static RfftPluginCreator<IrfftPlugin> gIrfftCreator{};
 
-struct StaticPluginRegistrar {
-    StaticPluginRegistrar() {
-        getPluginRegistry()->registerCreator(gRfftCreator, "");
-        getPluginRegistry()->registerCreator(gIrfftCreator, "");
-    }
-};
-static StaticPluginRegistrar gStaticRegistrar;
+// StaticPluginRegistrar removed to prevent WinError 1114 (DllMain loader lock).
+// Plugins are registered via getCreators() and initLibNvInferPlugins().
 
 }  // namespace trt_dft
 
@@ -630,6 +625,20 @@ extern "C" {
 #else
 #define TRT_PLUGIN_EXPORT __attribute__((visibility("default")))
 #endif
+
+TRT_PLUGIN_EXPORT bool initTrtDftPlugins() {
+    auto* registry = getPluginRegistry();
+    if (registry) {
+        registry->registerCreator(trt_dft::gRfftCreator, "");
+        registry->registerCreator(trt_dft::gIrfftCreator, "");
+        return true;
+    }
+    return false;
+}
+
+TRT_PLUGIN_EXPORT void setLoggerFinder(void* finder) {
+    (void)finder;
+}
 
 TRT_PLUGIN_EXPORT nvinfer1::IPluginCreatorInterface* const* getCreators(int32_t& nbCreators) {
     static nvinfer1::IPluginCreatorInterface* const creators[] = {

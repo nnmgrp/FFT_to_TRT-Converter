@@ -74,3 +74,31 @@ chaiNNer で高解像度画像を処理する場合、入力タイルサイズ�
 
 **16+ GB VRAM** の GPU:
 - 可変解像度で `--max-size 1024 1024` を指定することで、一般的なイラストの大半をわずか 1〜4 タイルで一瞬に処理可能です。
+
+---
+
+## 3. Rift73 / chaiNNer-C (v0.3.8) フォークおよび TensorRT 11.4 への対応
+
+フォーク **[Rift73/chaiNNer-C](https://github.com/Rift73/chaiNNer-C)** では **TensorRT 11.4.0.106** および **CUDA 13.4** が採用されています。このブランチ（`chaiNNer-C`）は、TensorRT 11 で導入された仕様変更に対応しています。
+
+1. **TensorRT 11 ライブラリリンク (`nvinfer_11.dll`):**
+   - 旧バージョン（TRT 10.x）で作成されたエンジンは TRT 11 のデシリアライザと互換性がありません。
+   - `chaiNNer-C` ブランチの `trt_dft_plugins.dll` は `nvinfer_11.dll` に直接リンクされています。
+
+2. **`setLoggerFinder` エクスポートの必須化:**
+   - TensorRT 11 の `nvinfer1::PluginRegistry::loadLibraryCommon` では、`setLoggerFinder` がエクスポートされていないプラグイン DLL は読み込みが拒否されます。本プラグインは `setLoggerFinder` および `getCreators` の両方を正常にエクスポートしています。
+
+3. **Windows ローダーロック (WinError 1114) の解消:**
+   - `DllMain` 内での静的プラグイン登録を廃止し、chaiNNer-C 起動時の初期化エラーを完全に解消しました。
+
+4. **chaiNNer-C への配置手順:**
+   - ビルド済み DLL は `prebuilt/win64_cuda13_trt11/trt_dft_plugins.dll` に配置されています。
+   - 以下のいずれかのフォルダにコピーしてください:
+     ```
+     <chaiNNer-C フォルダ>\python\python\Lib\site-packages\tensorrt_libs\
+     ```
+     または
+     ```
+     <chaiNNer-C フォルダ>\resources\src\nodes\impl\tensorrt\
+     ```
+   - chaiNNer-C 内で TensorRT ノードを実行すると、`Rfft` および `Irfft` が自動的に認識されます。

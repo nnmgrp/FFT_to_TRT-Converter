@@ -250,23 +250,34 @@ class FSAS(nn.Module):
             B, C, H, W = q.shape
             q_patch = q.view(
                 B, C, H // self.patch_size, self.patch_size, W // self.patch_size, self.patch_size
-            ).permute(0, 1, 2, 4, 3, 5)
+            ).permute(0, 1, 2, 4, 3, 5).contiguous()
             k_patch = k.view(
                 B, C, H // self.patch_size, self.patch_size, W // self.patch_size, self.patch_size
-            ).permute(0, 1, 2, 4, 3, 5)
+            ).permute(0, 1, 2, 4, 3, 5).contiguous()
 
-            q_fft = torch.fft.rfft2(q_patch.float(), norm=norm_str)
-            k_fft = torch.fft.rfft2(k_patch.float(), norm=norm_str)
+            q_fft = LawfftRFFT2.apply(q_patch.float(), self.normalized)
+            k_fft = LawfftRFFT2.apply(k_patch.float(), self.normalized)
 
-            out = q_fft * k_fft
-            out = torch.fft.irfft2(out, s=(self.patch_size, self.patch_size), norm=norm_str)
+            qr, qi = q_fft[..., 0], q_fft[..., 1]
+            kr, ki = k_fft[..., 0], k_fft[..., 1]
+            out_r = qr * kr - qi * ki
+            out_i = qr * ki + qi * kr
+            out_ri = torch.stack([out_r, out_i], dim=-1)
+
+            out = LawfftIRFFT2.apply(out_ri, self.normalized)
             out = out.to(v.dtype)
             out = out.permute(0, 1, 2, 4, 3, 5).reshape(B, C, H, W)
         else:
-            q_fft = torch.fft.rfft2(q.float(), norm=norm_str)
-            k_fft = torch.fft.rfft2(k.float(), norm=norm_str)
-            out = q_fft * k_fft
-            out = torch.fft.irfft2(out, norm=norm_str)
+            q_fft = LawfftRFFT2.apply(q.float(), self.normalized)
+            k_fft = LawfftRFFT2.apply(k.float(), self.normalized)
+
+            qr, qi = q_fft[..., 0], q_fft[..., 1]
+            kr, ki = k_fft[..., 0], k_fft[..., 1]
+            out_r = qr * kr - qi * ki
+            out_i = qr * ki + qi * kr
+            out_ri = torch.stack([out_r, out_i], dim=-1)
+
+            out = LawfftIRFFT2.apply(out_ri, self.normalized)
             out = out.to(v.dtype)
 
         out = self.norm(out)
