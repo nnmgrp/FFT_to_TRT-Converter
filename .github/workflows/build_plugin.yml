@@ -1,0 +1,96 @@
+name: Build TensorRT DFT Plugin (Windows)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'plugin/**'
+      - '.github/workflows/build_plugin.yml'
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'plugin/**'
+      - '.github/workflows/build_plugin.yml'
+
+jobs:
+  build-windows:
+    name: Build CUDA ${{ matrix.cuda }} on Windows
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        cuda: ['12.8', '13.1']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup MSVC Developer Environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Install CUDA Toolkit ${{ matrix.cuda }}
+        uses: Jimver/cuda-toolkit@v0.2.36
+        with:
+          cuda: ${{ matrix.cuda }}
+          method: 'network'
+
+      - name: Configure CMake
+        shell: pwsh
+        run: |
+          cmake -B build -S plugin `
+            -G "Visual Studio 17 2022" -A x64 `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_CUDA_ARCHITECTURES="75;80;86;89;90;120"
+
+      - name: Build Plugin DLL
+        shell: pwsh
+        run: |
+          cmake --build build --config Release --parallel
+
+      - name: Verify Exported getCreators Symbol
+        shell: pwsh
+        run: |
+          $dll = "build/src/dft_plugins/Release/trt_dft_plugins.dll"
+          if (!(Test-Path $dll)) {
+            Write-Error "DLL not found: $dll"
+            exit 1
+          }
+          Write-Host "[OK] DLL successfully built: $dll"
+          $exports = dumpbin /exports $dll
+          $match = $exports | Select-String "getCreators"
+          if (!$match) {
+            Write-Error "Exported symbol 'getCreators' was NOT found in the DLL!"
+            exit 1
+          }
+          Write-Host "[OK] Confirmed exported symbol: $($match.Line)"
+
+      - name: Package Binaries
+        shell: pwsh
+        run: |
+          $pkgDir = "dist/trt_dft_plugins_cuda${{ matrix.cuda }}_win64"
+          New-Item -ItemType Directory -Force -Path $pkgDir | Out-Null
+          Copy-Item "build/src/dft_plugins/Release/trt_dft_plugins.dll" $pkgDir/
+          Copy-Item "build/src/dft_plugins/Release/trt_dft_plugins.lib" $pkgDir/
+          Compress-Archive -Path "$pkgDir/*" -DestinationPath "trt_dft_plugins_cuda${{ matrix.cuda }}_win64.zip"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trt_dft_plugins_cuda${{ matrix.cuda }}_win64
+          path: trt_dft_plugins_cuda${{ matrix.cuda }}_win64.zip
+
+      - name: Release Asset (On Tagged Release)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: trt_dft_plugins_cuda${{ matrix.cuda }}_win64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

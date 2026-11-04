@@ -23,9 +23,13 @@ if(DEFINED ENV{TENSORRT_DIR})
     set(TRT_ROOT "$ENV{TENSORRT_DIR}")
 elseif(DEFINED ENV{TENSORRT_PATH})
     set(TRT_ROOT "$ENV{TENSORRT_PATH}")
+elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../include/NvInfer.h")
+    set(TRT_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../..")
 elseif(EXISTS "G:/TensorRT")
     set(TRT_ROOT "G:/TensorRT")
 endif()
+
+message(STATUS "TensorRT root: ${TRT_ROOT}")
 
 if(TRT_ROOT)
     target_include_directories(${PROJECT_NAME} PRIVATE "${TRT_ROOT}/include")
@@ -37,6 +41,7 @@ find_library(NVINFER_LIB NAMES nvinfer_10 nvinfer
     HINTS ${TRT_ROOT}/lib
     REQUIRED
 )
+message(STATUS "Found nvinfer library: ${NVINFER_LIB}")
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     CUDA::cufft

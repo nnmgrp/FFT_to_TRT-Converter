@@ -6,7 +6,9 @@ echo Building TensorRT DFT Plugin for Windows
 echo ========================================================
 
 if not defined TENSORRT_DIR (
-    if exist "G:\TensorRT" (
+    if exist "%~dp0include\NvInfer.h" (
+        set "TENSORRT_DIR=%~dp0"
+    ) else if exist "G:\TensorRT" (
         set "TENSORRT_DIR=G:\TensorRT"
     ) else (
         echo [ERROR] TENSORRT_DIR is not set. Please set it to your TensorRT directory.

@@ -86,7 +86,21 @@ cd FFT_to_TRT-Converter
 pip install -r requirements.txt
 ```
 
-### 2. Export PyTorch to ONNX
+### 2. 1-Click Conversion (Drag & Drop)
+
+Simply drag and drop your model file (`.safetensors`, `.pth`, `.pt`) onto **`convert_to_engine.bat`**.
+
+The batch script automatically:
+1. Detects Python environment (local venv or chaiNNer embedded Python).
+2. Exports to intermediate ONNX with optimal tile size (256×256).
+3. Compiles memory-safe TensorRT Engine (`.engine`).
+4. Deletes the temporary ONNX file, leaving the finished engine right next to your model.
+
+---
+
+### 3. Manual Step-by-Step Conversion (CLI)
+
+#### Step A: Export PyTorch to ONNX
 
 Convert any GFISRV2 or LAWFFT checkpoint (`.pth` or `.safetensors`) directly to ONNX:
 
@@ -130,11 +144,17 @@ python converter\benchmark.py --model path\to\model.safetensors --engine path\to
 
 ---
 
-## Compiling the C++ Plugin from Source
+## Compiling the C++ Plugin
 
-If you wish to recompile `trt_dft_plugins.dll` for custom CUDA or TensorRT versions:
+### Option 1: Automatic Build via GitHub Actions (Zero Local C++ Setup)
+This repository includes a GitHub Actions CI workflow (`.github/workflows/build_plugin.yml`):
+- Compiles DLL targeting all GPU architectures simultaneously (`75;80;86;89;90;120`: Turing, Ampere, Ada, Blackwell).
+- Builds release packages for both **CUDA 12.8** (for chaiNNer) and **CUDA 13.1**.
+- 1-Click execution: On the GitHub repo, go to **Actions** $\to$ **Build TensorRT DFT Plugin** $\to$ **Run workflow**, and download the precompiled zip from build artifacts.
 
-1. Ensure **Visual Studio 2022** (with C++ Desktop Development), **CMake >= 3.20**, **CUDA Toolkit**, and **TensorRT** are installed.
+### Option 2: Local Compilation from Source
+Headers and import library are bundled in `plugin/include` and `plugin/lib`:
+1. Ensure **Visual Studio 2022** (with C++ Desktop Development), **CMake >= 3.20**, and **CUDA Toolkit** are installed.
 2. Run the build script:
    ```powershell
    cd plugin

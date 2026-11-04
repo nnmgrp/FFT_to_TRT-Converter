@@ -86,7 +86,21 @@ cd FFT_to_TRT-Converter
 pip install -r requirements.txt
 ```
 
-### 2. PyTorch モデルから ONNX へのエクスポート
+### 2. ワンクリック変換 (ドラッグ＆ドロップ)
+
+モデルファイル (`.safetensors`, `.pth`, `.pt`) を **`convert_to_engine.bat`** に直接ドラッグ＆ドロップするだけで完了します。
+
+バッチファイルが自動的に以下を実行します:
+1. Python 環境 (ローカル venv または chaiNNer 内蔵 Python) の自動検出。
+2. 最適なタイルサイズ (256×256) での中間 ONNX 出力。
+3. メモリ保護付き TensorRT Engine (`.engine`) の自動コンパイル。
+4. 一時 ONNX ファイルの自動削除 (元モデルと同じ場所に `.engine` のみ保存)。
+
+---
+
+### 3. 手動変換 (CLI)
+
+#### ステップ A: PyTorch モデルから ONNX へのエクスポート
 
 GFISRV2 または LAWFFT のチェックポイント (`.pth` または `.safetensors`) を直接 ONNX へ変換します:
 
@@ -130,11 +144,17 @@ python converter\benchmark.py --model path\to\model.safetensors --engine path\to
 
 ---
 
-## C++ プラグインのソースコードビルド
+## C++ プラグインのビルド
 
-特定の CUDA または TensorRT バージョン向けに `trt_dft_plugins.dll` を再コンパイルする場合:
+### 方法 1: GitHub Actions による自動ビルド (ローカル C++ 環境不要)
+本リポジトリには GitHub Actions CI ワークフロー (`.github/workflows/build_plugin.yml`) が同梱されています:
+- すべての GPU アーキテクチャ向けに一括コンパイル (`75;80;86;89;90;120`: Turing, Ampere, Ada, Blackwell)。
+- **CUDA 12.8** (chaiNNer 向け) および **CUDA 13.1** のビルドパッケージを同時生成。
+- リポジトリの **Actions** タブ $\to$ **Build TensorRT DFT Plugin** $\to$ **Run workflow** をクリックするだけで、約 5 分後にビルド成果物 (zip) をダウンロードできます。
 
-1. **Visual Studio 2022** (C++ デスクトップ開発)、**CMake >= 3.20**、**CUDA Toolkit**、**TensorRT** がインストールされていることを確認します。
+### 方法 2: ローカル環境での手動ビルド
+必要なヘッダーとインポートライブラリは `plugin/include` および `plugin/lib` に同梱されています:
+1. **Visual Studio 2022** (C++ デスクトップ開発)、**CMake >= 3.20**、**CUDA Toolkit** がインストールされていることを確認します。
 2. ビルドスクリプトを実行します:
    ```powershell
    cd plugin
