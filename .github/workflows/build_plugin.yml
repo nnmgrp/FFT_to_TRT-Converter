@@ -95,10 +95,31 @@ jobs:
           name: trt_dft_plugins_cuda${{ matrix.cuda }}_win64
           path: trt_dft_plugins_cuda${{ matrix.cuda }}_win64.zip
 
-      - name: Release Asset (On Tagged Release)
-        if: startsWith(github.ref, 'refs/tags/')
+  publish-prerelease:
+    name: Publish prerelease
+    if: github.event_name != 'pull_request'
+    needs: build-windows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: trt_dft_plugins_cuda*_win64
+          path: artifacts
+
+      - name: Publish GitHub prerelease
         uses: softprops/action-gh-release@v2
         with:
-          files: trt_dft_plugins_cuda${{ matrix.cuda }}_win64.zip
+          tag_name: build-${{ github.run_number }}-${{ github.run_attempt }}
+          target_commitish: ${{ github.sha }}
+          name: TensorRT DFT Plugin build ${{ github.run_number }} (${{ github.ref_name }})
+          body: Automated prerelease from commit ${{ github.sha }}.
+          prerelease: true
+          make_latest: false
+          files: artifacts/**/*.zip
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
