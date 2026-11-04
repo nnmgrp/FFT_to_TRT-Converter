@@ -45,6 +45,14 @@ class DLLResolver:
                 candidates.append(os.path.join(val, "bin"))
                 candidates.append(os.path.join(val, "bin", "x64"))
 
+        # chaiNNer-C bundled python site-packages (tensorrt_libs, etc.)
+        for path_opt in (
+            r"F:\Downloads\chaiNNer-C-v0.3.4-win-x64\python\python\Lib\site-packages\tensorrt_libs",
+            r"F:\Downloads\chaiNNer-C-v0.3.4-win-x64\python\python\Lib\site-packages\nvidia\cu13\bin\x86_64",
+        ):
+            if os.path.isdir(path_opt):
+                candidates.append(path_opt)
+
         # Common disk paths
         for drive in ("C:", "G:", "D:", "F:"):
             candidates.extend([
@@ -88,7 +96,7 @@ class DLLResolver:
             logger.warning("[DLL] [WARN] Could not find cuFFT DLL (cufft64_13.dll / cufft64_12.dll).")
 
         # 2. nvinfer loading
-        for nvinfer_name in ("nvinfer_10.dll", "nvinfer.dll"):
+        for nvinfer_name in ("nvinfer_11.dll", "nvinfer_10.dll", "nvinfer.dll"):
             try:
                 ctypes.CDLL(nvinfer_name)
                 logger.info(f"[DLL] [OK] Loaded TensorRT base library: {nvinfer_name}")
@@ -103,20 +111,30 @@ class DLLResolver:
                 logger.error(f"[DLL] [FAIL] Plugin DLL not found at: {abs_plugin}")
                 return False
 
-            try:
-                # On Windows, winmode=0x1000 uses LOAD_LIBRARY_SEARCH_DEFAULT_DIRS
-                ctypes.CDLL(abs_plugin, winmode=0x1000)
-                logger.info(f"[DLL] [OK] Successfully loaded DFT plugin from: {abs_plugin}")
-                return True
-            except OSError as e:
-                # Fallback to winmode=0
+            loaded = False
+            for winmode in (0x1000, 0):
                 try:
-                    ctypes.CDLL(abs_plugin, winmode=0)
-                    logger.info(f"[DLL] [OK] Successfully loaded DFT plugin (winmode=0) from: {abs_plugin}")
-                    return True
-                except Exception as e2:
-                    logger.error(f"[DLL] [FAIL] Failed to load plugin DLL: {e2}")
-                    return False
+                    ctypes.CDLL(abs_plugin, winmode=winmode)
+                    logger.info(f"[DLL] [OK] Successfully loaded DFT plugin (winmode={winmode}) from: {abs_plugin}")
+                    loaded = True
+                    break
+                except OSError:
+                    continue
+
+            # Also register with TensorRT plugin registry (standard in TRT 10 / 11)
+            try:
+                import tensorrt as trt
+                reg = trt.get_plugin_registry()
+                reg_handle = reg.load_library(abs_plugin)
+                if reg_handle:
+                    logger.info(f"[DLL] [OK] Registered DFT plugin in TensorRT plugin registry: {abs_plugin}")
+                    loaded = True
+            except Exception as e:
+                logger.debug(f"[DLL] TensorRT load_library note: {e}")
+
+            if not loaded:
+                logger.error(f"[DLL] [FAIL] Failed to load plugin DLL: {abs_plugin}")
+                return False
 
         return True
 
@@ -124,9 +142,13 @@ class DLLResolver:
 def locate_default_plugin_dll() -> Optional[str]:
     """Locate prebuilt plugin DLL relative to repo."""
     repo_root = Path(__file__).resolve().parent.parent
-    candidate = repo_root / "prebuilt" / "win64_cuda13_trt10" / "trt_dft_plugins.dll"
-    if candidate.is_file():
-        return str(candidate)
+    for cand in (
+        repo_root / "prebuilt" / "win64_cuda13_trt11" / "trt_dft_plugins.dll",
+        repo_root / "prebuilt" / "win64_cuda13_trt10" / "trt_dft_plugins.dll",
+        repo_root / "plugin" / "build" / "src" / "dft_plugins" / "Release" / "trt_dft_plugins.dll",
+    ):
+        if cand.is_file():
+            return str(cand)
     local_cand = Path(__file__).resolve().parent / "trt_dft_plugins.dll"
     if local_cand.is_file():
         return str(local_cand)

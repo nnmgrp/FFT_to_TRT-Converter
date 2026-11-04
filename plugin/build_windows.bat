@@ -5,6 +5,12 @@ echo ========================================================
 echo Building TensorRT DFT Plugin for Windows
 echo ========================================================
 
+where cmake >nul 2>nul
+if %ERRORLEVEL% neq 0 (
+    if exist "C:\Program Files\CMake\bin" set "PATH=C:\Program Files\CMake\bin;!PATH!"
+    if exist "G:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin" set "PATH=G:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin;!PATH!"
+)
+
 if not defined TENSORRT_DIR (
     if exist "%~dp0include\NvInfer.h" (
         set "TENSORRT_DIR=%~dp0"

@@ -37,7 +37,7 @@ if(TRT_ROOT)
 endif()
 
 # Find nvinfer library
-find_library(NVINFER_LIB NAMES nvinfer_10 nvinfer
+find_library(NVINFER_LIB NAMES nvinfer_11 nvinfer_10 nvinfer
     HINTS ${TRT_ROOT}/lib
     REQUIRED
 )

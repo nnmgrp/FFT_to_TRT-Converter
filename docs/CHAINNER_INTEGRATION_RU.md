@@ -74,3 +74,31 @@
 
 Для видеокарт с **16+ ГБ VRAM**:
 - Динамический профиль с `--max-size 1024 1024` позволяет обрабатывать большинство иллюстраций целиком всего за 1–4 прохода без накладных расходов.
+
+---
+
+## 3. Особенности форка Rift73 / chaiNNer-C (v0.3.8) с TensorRT 11.4
+
+Форк **[Rift73/chaiNNer-C](https://github.com/Rift73/chaiNNer-C)** обновлен до **TensorRT 11.4.0.106** и **CUDA 13.4**. В этой версии архитектура загрузки плагинов NVIDIA претерпела важные изменения:
+
+1. **Библиотеки TensorRT 11 (`nvinfer_11.dll`):**
+   - Движки, скомпилированные в старых версиях (TRT 10.x), несовместимы с десериализатором TRT 11.4.
+   - Плагин `trt_dft_plugins.dll` на ветке `chaiNNer-C` слинкован напрямую с `nvinfer_11.dll`.
+
+2. **Требование к экспорту `setLoggerFinder`:**
+   - В TensorRT 11 функция `nvinfer1::PluginRegistry::loadLibraryCommon` проверяет наличие точки входа `setLoggerFinder`. Если библиотека её не экспортирует, загрузка отклоняется. Наш плагин предоставляет корректный экспорт `setLoggerFinder` и `getCreators`.
+
+3. **Устранение Windows Loader Lock (WinError 1114):**
+   - Убран статический вызов реестра плагинов из `DllMain`, что исключило ошибки инициализации при запуске chaiNNer-C.
+
+4. **Установка в chaiNNer-C:**
+   - Готовая скомпилированная DLL находится в папке `prebuilt/win64_cuda13_trt11/trt_dft_plugins.dll`.
+   - Скопируйте её в:
+     ```
+     <папка_chaiNNer-C>\python\python\Lib\site-packages\tensorrt_libs\
+     ```
+     или в:
+     ```
+     <папка_chaiNNer-C>\resources\src\nodes\impl\tensorrt\
+     ```
+   - При запуске нод TensorRT в chaiNNer-C операции `Rfft` и `Irfft` регистрируются автоматически.

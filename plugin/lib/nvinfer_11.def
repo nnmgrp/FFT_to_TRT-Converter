@@ -1,0 +1,3 @@
+LIBRARY nvinfer_11.dll
+EXPORTS
+    getPluginRegistry

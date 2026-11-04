@@ -31,12 +31,20 @@ if not exist "%INPUT_MODEL%" (
 :: 2. Find Python environment with PyTorch & TensorRT
 set "PYTHON_EXE="
 
-:: Check local virtual environments first
-if exist "%~dp0venv\Scripts\python.exe" set "PYTHON_EXE=%~dp0venv\Scripts\python.exe"
+:: Check chaiNNer-C (Rift73 v0.3.8) embedded python first
+if not defined PYTHON_EXE if exist "F:\Downloads\chaiNNer-C-v0.3.4-win-x64\python\python\python.exe" (
+    set "PYTHON_EXE=F:\Downloads\chaiNNer-C-v0.3.4-win-x64\python\python\python.exe"
+)
+if not defined PYTHON_EXE if exist "%~dp0..\chaiNNer-C-v0.3.4-win-x64\python\python\python.exe" (
+    set "PYTHON_EXE=%~dp0..\chaiNNer-C-v0.3.4-win-x64\python\python\python.exe"
+)
+
+:: Check local virtual environments
+if not defined PYTHON_EXE if exist "%~dp0venv\Scripts\python.exe" set "PYTHON_EXE=%~dp0venv\Scripts\python.exe"
 if not defined PYTHON_EXE if exist "%~dp0..\venv_trt\Scripts\python.exe" set "PYTHON_EXE=%~dp0..\venv_trt\Scripts\python.exe"
 if not defined PYTHON_EXE if exist "G:\TRT_converter\venv_trt\Scripts\python.exe" set "PYTHON_EXE=G:\TRT_converter\venv_trt\Scripts\python.exe"
 
-:: Check chaiNNer embedded python
+:: Check other chaiNNer embedded installations
 if not defined PYTHON_EXE if exist "%~dp0..\chaiNNer-windows-latest-nightly.2026-02-14\python\python\python.exe" (
     set "PYTHON_EXE=%~dp0..\chaiNNer-windows-latest-nightly.2026-02-14\python\python\python.exe"
 )

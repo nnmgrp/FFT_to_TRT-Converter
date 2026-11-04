@@ -74,3 +74,31 @@ For GPUs with **8 GB VRAM** (e.g. RTX 3070, RTX 4060):
 
 For GPUs with **16+ GB VRAM**:
 - Dynamic `--max-size 1024 1024` allows processing entire typical anime / manga illustrations in 1 to 4 tiles.
+
+---
+
+## 3. Rift73 / chaiNNer-C (v0.3.8) Fork Specifics (TensorRT 11.4)
+
+The **[Rift73/chaiNNer-C](https://github.com/Rift73/chaiNNer-C)** fork targets **TensorRT 11.4.0.106** and **CUDA 13.4**. This branch (`chaiNNer-C`) addresses key changes in NVIDIA's plugin mechanism:
+
+1. **TensorRT 11 Library Linking (`nvinfer_11.dll`):**
+   - Engines built for older TRT 10.x runtimes fail deserialization in TRT 11.
+   - The plugin DLL on the `chaiNNer-C` branch links directly against `nvinfer_11.dll`.
+
+2. **Mandatory `setLoggerFinder` Export:**
+   - In TensorRT 11, `nvinfer1::PluginRegistry::loadLibraryCommon` rejects libraries that do not export `setLoggerFinder`. Our plugin provides valid exports for both `setLoggerFinder` and `getCreators`.
+
+3. **Prevention of Windows Loader Lock (WinError 1114):**
+   - Eliminated static plugin registry calls inside `DllMain`, preventing initialization failure during module loading.
+
+4. **Installation in chaiNNer-C:**
+   - The prebuilt DLL is available at `prebuilt/win64_cuda13_trt11/trt_dft_plugins.dll`.
+   - Copy it into:
+     ```
+     <chaiNNer-C_dir>\python\python\Lib\site-packages\tensorrt_libs\
+     ```
+     or:
+     ```
+     <chaiNNer-C_dir>\resources\src\nodes\impl\tensorrt\
+     ```
+   - When TensorRT nodes run inside chaiNNer-C, the `Rfft` and `Irfft` operations are automatically discovered and loaded.

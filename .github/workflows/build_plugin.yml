@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - chaiNNer-C
     paths:
       - 'plugin/**'
       - '.github/workflows/build_plugin.yml'
@@ -13,6 +14,7 @@ on:
   pull_request:
     branches:
       - main
+      - chaiNNer-C
     paths:
       - 'plugin/**'
       - '.github/workflows/build_plugin.yml'
@@ -55,7 +57,7 @@ jobs:
         run: |
           cmake --build build --config Release --parallel
 
-      - name: Verify Exported getCreators Symbol
+      - name: Verify Exported Symbols
         shell: pwsh
         run: |
           $dll = "build/src/dft_plugins/Release/trt_dft_plugins.dll"
@@ -71,6 +73,12 @@ jobs:
             exit 1
           }
           Write-Host "[OK] Confirmed exported symbol: $($match.Line)"
+          $matchLogger = $exports | Select-String "setLoggerFinder"
+          if (!$matchLogger) {
+            Write-Error "Exported symbol 'setLoggerFinder' was NOT found in the DLL!"
+            exit 1
+          }
+          Write-Host "[OK] Confirmed exported symbol: $($matchLogger.Line)"
 
       - name: Package Binaries
         shell: pwsh
